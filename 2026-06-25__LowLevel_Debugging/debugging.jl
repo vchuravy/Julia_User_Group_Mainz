@@ -450,6 +450,13 @@ md"""
 ### Polyester
 """
 
+# ╔═╡ 0186ae3f-41d9-41b4-b48b-c6973e8eca6f
+md"""
+!!! note
+    Bugs with parallel systems often require a specific sequence of scheduling decisions. One of the biggest challenging it to actual reproduce the reliably.
+
+"""
+
 # ╔═╡ 0ccccedd-5bcd-40f7-bf79-57991d25f93e
 md"""
 ```sh
@@ -457,10 +464,47 @@ watch -e julia +1.12 -g2 --project=.  --threads=3 --check-bounds=yes --code-cove
 ```
 """
 
-# ╔═╡ 748b972b-5f19-497a-a4cb-2494e33e07f8
+# ╔═╡ 42d659ef-9828-4181-8677-b3134bc17ee7
+md"""
+#### `rr  record` 
+"""
+
+# ╔═╡ 9c770ea7-63d2-4e18-bb8b-68c9b6341585
+md"""
+```sh
+ENABLE_GDBLISTENER=1 watch -e rr record -h ~/src/julia-1.12/julia -g2 --project=.  --threads=3 --check-bounds=yes --code-coverage=none test_threaded.jl
+```
+"""
+
+# ╔═╡ b017a171-3a85-4dd1-98f0-c1c35e30fbe4
+md"""
+- `watch -e` run until the program fails
+- `rr record -h` "chaos mode" allow for random perturbation of scheduling
+"""
+
+# ╔═╡ d41ce914-23e6-4d5b-81d6-a47aa41b73ba
+md"""
+#### `rr replay`
+"""
+
+# ╔═╡ 493d00bd-170f-4418-9c5c-143fc8e0f1a2
 md"""
 ```
-rr record
+Thread 1 received signal SIGSEGV, Segmentation fault.
+julia_wake_thread!_2999 (_tid=2) at /home/vchuravy/.julia/packages/ThreadingUtilities/gpppI/src/threadtasks.jl:61
+61	@noinline function wake_thread!(_tid::T) where {T<:Integer}
+(rr) bt 9
+#0  julia_wake_thread!_2999 (_tid=2) at /home/vchuravy/.julia/packages/ThreadingUtilities/gpppI/src/threadtasks.jl:61
+#1  0x00007bdd34a16d6d in launch () at /home/vchuravy/.julia/packages/ThreadingUtilities/gpppI/src/threadtasks.jl:18
+#2  launch_batched_thread! () at /home/vchuravy/.julia/packages/Polyester/almvr/src/batch.jl:107
+#3  macro expansion () at /home/vchuravy/.julia/packages/Polyester/almvr/src/batch.jl:241
+#4  _batch_no_reserve () at /home/vchuravy/.julia/packages/Polyester/almvr/src/batch.jl:168
+#5  batch () at /home/vchuravy/.julia/packages/Polyester/almvr/src/batch.jl:334
+#6  macro expansion () at /home/vchuravy/.julia/packages/Polyester/almvr/src/closure.jl:456
+#7  macro expansion () at /home/vchuravy/.julia/packages/Trixi/fS5XP/src/auxiliary/auxiliary.jl:234
+#8  julia_calc_interface_flux!_21198 (backend=..., surface_flux_values=<optimized out>, mesh=..., have_nonconservative_terms=..., equations=...,
+    surface_integral=..., dg=..., cache=...) at /home/vchuravy/.julia/packages/Trixi/fS5XP/src/solvers/dgsem_tree/dg_2d.jl:606
+(More stack frames follow...)
 ```
 """
 
@@ -1030,8 +1074,13 @@ version = "3.6.4+0"
 # ╟─2c02e9dc-12f0-426c-af27-ea5fcacd0d29
 # ╟─b9276851-fc1b-47ee-8165-5c36ebfc954d
 # ╟─5f175532-d452-4035-b4ce-397d50941194
-# ╠═0ccccedd-5bcd-40f7-bf79-57991d25f93e
-# ╠═748b972b-5f19-497a-a4cb-2494e33e07f8
+# ╟─0186ae3f-41d9-41b4-b48b-c6973e8eca6f
+# ╟─0ccccedd-5bcd-40f7-bf79-57991d25f93e
+# ╟─42d659ef-9828-4181-8677-b3134bc17ee7
+# ╟─9c770ea7-63d2-4e18-bb8b-68c9b6341585
+# ╟─b017a171-3a85-4dd1-98f0-c1c35e30fbe4
+# ╟─d41ce914-23e6-4d5b-81d6-a47aa41b73ba
+# ╟─493d00bd-170f-4418-9c5c-143fc8e0f1a2
 # ╟─f6dde184-9ef1-44f0-82ca-3e20a6b926d4
 # ╟─393391b3-a844-49b1-bbb2-f7565d390db7
 # ╟─5b1b0048-038a-41fe-8a0e-188f3a6c4bd8
